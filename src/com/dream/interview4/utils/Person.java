@@ -13,7 +13,8 @@ import lombok.*;
 @Setter
 public class Person {
 
-    //温馨提醒，本类没有覆写hashcode和equals方法
+    //温馨提醒，
+    // 本类没有覆写hashcode和equals方法
     private Integer id;
     private String personName;
 
