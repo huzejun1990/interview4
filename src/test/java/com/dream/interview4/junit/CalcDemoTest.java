@@ -25,5 +25,8 @@ class CalcDemoTest {
 
     @Test
     void sub() {
+        CalcDemo calcDemo = new CalcDemo();
+        int retValue = calcDemo.sub(2,2);
+        assertEquals(4,retValue);
     }
 }
