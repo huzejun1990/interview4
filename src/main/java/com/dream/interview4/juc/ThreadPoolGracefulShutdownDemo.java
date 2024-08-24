@@ -22,7 +22,21 @@ public class ThreadPoolGracefulShutdownDemo {
     public static void main(String[] args) {
 
 //        shutdown_Test();
-        shutdownNow_Test();
+//        shutdownNow_Test();
+//        shutdown_awaitTermination_Test();
+        shutdownNow_awaitTermination_Test();
+
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+
+
+        try {
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            finalOK_shutdownAndAwaitTermination(threadPool);
+        }
+
 /*        ExecutorService threadPool = Executors.newFixedThreadPool(3);
 
         try {
@@ -38,6 +52,8 @@ public class ThreadPoolGracefulShutdownDemo {
         }*/
 
     }
+
+
 
 
     /**
@@ -63,6 +79,87 @@ public class ThreadPoolGracefulShutdownDemo {
         }
 
     }
+
+    /**
+     *
+     */
+    private static void shutdownNow_awaitTermination_Test() {
+        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+
+        for (int i = 1; i <= 10; i++) {
+            try {
+                threadPool.execute(new Task(i));
+            } catch (RejectedExecutionException e) {
+                System.out.println("rejected, task-"+i);
+            }
+
+            if (i == 5) {
+                List<Runnable> tasks = threadPool.shutdownNow();
+                for (Runnable task : tasks) {
+                    if (task instanceof Task) {
+                        System.out.println("waiting task: " + ((Task) task).getName());
+                    }
+                }
+
+            }
+        }
+
+        try {
+            boolean isStop = threadPool.awaitTermination(4, TimeUnit.SECONDS);
+            System.out.println("is pool isStop: "+isStop);
+            System.out.println(Thread.currentThread().getName()+"\t"+"22222222222222");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("---------------------");
+        System.out.println(Thread.currentThread().getName()+"\t"+"all tests finished");
+    }
+
+    /**
+     *
+     */
+    private static void shutdown_awaitTermination_Test() {
+        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+        //提交10个任务，在第5个任务提交完，准备提交第6个的时候执行shutdown
+        for (int i = 1; i <= 10 ; i++) {
+            System.out.println("第："+i+" 次提交");
+
+            try {
+                threadPool.execute(new Task(i));
+            } catch (RejectedExecutionException e) {
+                System.out.println("rejected, task-"+i);
+            }
+            //i等于5的时候shutdown,意味着从第6次开始就不能提交新任务
+            if (i == 5) {
+                threadPool.shutdown();
+                System.out.println("i等于5的时候shutdown,意味着从第6次开始就不能提交新任务");
+                System.out.println();
+            }
+
+            try {
+                /**
+                 * 任务没执行且没到设定时间，是不会执行最下面两行打印代码的
+                 *
+                 * 现在把等待时间设置为4秒，达到设置时间后，就不再阻塞当前线程了，
+                 * 直接打印了下面两行代码，并且返回了 false 说明 线程孙没有停止
+                 *
+                 * 有时我们需要主线程等所有子线程执行完毕后再运行，在所有任务提交后
+                 * 调用shutdown触发 awaitTermination,阻塞主线程，当所有子线程执行完毕后，解除阻塞
+                 */
+                boolean isStop = threadPool.awaitTermination(4, TimeUnit.SECONDS);
+                System.out.println("is pool isStop: "+ isStop);
+                System.out.println(Thread.currentThread().getName()+"\t"+"1111111111111111111111");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("------------------------");
+            System.out.println(Thread.currentThread().getName()+"\t"+"mission is over");
+            System.out.println();
+        }
+
+    }
+
 
     /**
      * 调用 shutdownNow 后，第一个任务正在睡眠的时候，触发了 interrupt 中断
@@ -106,7 +203,7 @@ public class ThreadPoolGracefulShutdownDemo {
             System.out.println("第：" + i + " 次提交");
             //此处不加 try ...catch块，方便效果演示
             threadPool.execute(new Task(i));
-
+            //i 等于5的时候shutdown,意味着从第6次开始就不能提交新任务
             if (i == 5) {
                 threadPool.shutdown();
             }
@@ -135,7 +232,7 @@ public class ThreadPoolGracefulShutdownDemo {
                 System.out.println("interrupted, " + getName());
                 return;
             }
-            System.out.println(getName() + "finished");
+            System.out.println(getName() + " finished");
             System.out.println();
         }
     }
