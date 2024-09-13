@@ -1,0 +1,32 @@
+package com.dream.interview4.controller;
+
+import cn.hutool.core.util.IdUtil;
+import com.dream.interview4.aopreview.PayService;
+import jakarta.annotation.Resource;
+import org.springframework.boot.SpringBootVersion;
+import org.springframework.core.SpringVersion;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @Author : huzejun
+ * @Date: 2024/9/14-5:59
+ */
+@RestController
+public class PayAopReviewController {
+
+    @Resource
+    private PayService payService;
+
+    @GetMapping(value = "/pay/aop")
+    public String pay()
+    {
+        System.out.println("SpringVersion: " + SpringVersion.getVersion()+"\t"+ "SpringBootVersion: "+ SpringBootVersion.getVersion());
+
+        payService.pay();
+
+        return IdUtil.simpleUUID();
+
+    }
+
+}
