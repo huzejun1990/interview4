@@ -2,6 +2,7 @@ package com.dream.interview4.aops;
 
 import com.dream.interview4.annotations.MyRedisCache;
 import jakarta.annotation.Resource;
+import lombok.val;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -29,7 +30,6 @@ public class MyRedisCacheAspect {
     public void cachePointCut() {
     }
 
-    ;
 
     @Around("cachePointCut()")
     public Object doCache(ProceedingJoinPoint joinPoint) {
@@ -50,7 +50,8 @@ public class MyRedisCacheAspect {
             //4 SpringEL 解析器
             ExpressionParser parser = new SpelExpressionParser();
             Expression expression = parser.parseExpression(matchValueSpringEL);
-            EvaluationContext context = new StandardEvaluationContext(redisTemplate);
+            EvaluationContext context = new StandardEvaluationContext();
+//            EvaluationContext context = new StandardEvaluationContext(redisTemplate);
 
             //5 获得方法里面的参数个数
             Object[] args = joinPoint.getArgs();
