@@ -26,6 +26,7 @@ public class MyRedisCacheAspect {
     @Resource
     private RedisTemplate redisTemplate;
 
+    //配置织入点
     @Pointcut("@annotation(com.dream.interview4.annotations.MyRedisCache)")
     public void cachePointCut() {
     }
@@ -34,6 +35,14 @@ public class MyRedisCacheAspect {
     @Around("cachePointCut()")
     public Object doCache(ProceedingJoinPoint joinPoint) {
         Object result = null;
+
+        /**
+         *     @MyRedisCache(keyPrefix = "user",matchValue = "#id")
+         *     public User getUserById(Integer id)
+         *     {
+         *         return userMapper.selectByPrimaryKey(id);
+         *     }
+         */
 
         try {
             //1 获得重载后的方法名
@@ -59,7 +68,7 @@ public class MyRedisCacheAspect {
             String[] parameterNames = discoverer.getParameterNames(method);
 
             for (int i = 0; i < parameterNames.length; i++) {
-                System.out.println("获得方法里参数名和值：" + parameterNames[i]);
+                System.out.println("获得方法里参数名和值：" + parameterNames[i] + "\t" + args[i].toString());
                 context.setVariable(parameterNames[i], args[i].toString());
             }
 
@@ -69,18 +78,17 @@ public class MyRedisCacheAspect {
 
             //7 先reids里面查询看有没有
             result = redisTemplate.opsForValue().get(key);
-
             if (result != null) {
-                System.out.println("redis里面有，我直接返回结果不再打扰mysql: "+result);
+                System.out.println("redis里面有，我直接返回结果不再打扰mysql: " + result);
                 return result;
             }
 
             //8 redis里面没有，去找mysql查询或叫进行后续业务逻辑
-            result  = joinPoint.proceed();
+            result = joinPoint.proceed();
 
             //9 mysql步骤结束，还需要把结果存入redis一次，缓存补偿
             if (result != null) {
-                System.out.println("---------redis里面无，还需要把结果存入redis一次，缓存补偿："+result);
+                System.out.println("---------redis里面无，还需要把结果存入redis一次，缓存补偿：" + result);
                 redisTemplate.opsForValue().set(key, result);
             }
 
